@@ -1,0 +1,33 @@
+{
+    "name": "rohitpavaskar/localization",
+    "description": "Localization using labels stored in database and served usinche for performance",
+    "type": "library",
+    "require": {
+        "php": ">=7",
+        "illuminate/support": "5.5.x|5.6.x|5.7.x|5.8.x",
+        "illuminate/translation": "5.5.x|5.6.x|5.7.x|5.8.x"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rohit Pavaskar",
+            "email": "rohitpavaskar.19@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Rohitpavaskar\\Localization\\": "src/"
+        },
+        "files": [
+            "src/Helpers/Helper.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rohitpavaskar\\Localization\\LocalizationServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}
