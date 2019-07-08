@@ -1,6 +1,6 @@
 {
     "name": "rohitpavaskar/localization",
-    "description": "Localization using labels stored in database and served usinche for performance",
+    "description": "Localization using labels stored in database and served using cache for performance",
     "type": "library",
     "require": {
         "php": ">=7",
