@@ -44,7 +44,7 @@ class LocalizationServiceProvider extends ServiceProvider {
     public function registerHelpers() {
         // Load the helpers in app/Http/helpers.php
         if (file_exists($file = __DIR__ . '/Helpers/Helper.php')) {
-            require $file;
+            require_once $file;
         }
     }
 
