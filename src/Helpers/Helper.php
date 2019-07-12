@@ -1,24 +1,25 @@
 <?php
 
 namespace Rohitpavaskar\Localization\Helpers;
+use Illuminate\Support\Facades\Cache;
 
 use DB;
 
-function getTranslations($direcory, $file) {
-
-    $cur_dir = explode(DIRECTORY_SEPARATOR, $direcory);
-    $lang = last($cur_dir);
-    
-    $file = str_replace('.php', '', $file);
-dd($file);
-    $translations = DB::table('translations')
-            ->where('language', $lang)
-            ->get();
-    $translationArr = array();
-    foreach ($translations as $translation) {
-        $translationArr[$translation->key] = $translation->text;
-    }
-    return $translationArr;
+function getTranslations($file) {
+    $fileArr = explode(DIRECTORY_SEPARATOR, $file);
+    $lang = $fileArr[count($fileArr)-2];
+    $type = str_replace('.php', '', $fileArr[count($fileArr)-1]);
+    return Cache::rememberForever('translations_' . $lang . '_' . $type, function() use($lang, $type) {
+                $translations = DB::table('translations')
+                        ->where('language', $lang)
+                        ->where('type', $type)
+                        ->get();
+                $translationArr = array();
+                foreach ($translations as $translation) {
+                    $translationArr[$translation->key] = $translation->text;
+                }
+                return $translationArr;
+            });
 }
 
 ?>
