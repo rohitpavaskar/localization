@@ -1,0 +1,119 @@
+<?php
+
+namespace Rohitpavaskar\Localization\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Rohitpavaskar\Localization\Models\Translation;
+use Illuminate\Support\Facades\Cache;
+use Rohitpavaskar\Localization\Http\Resources\Translation as TranslationResource;
+use Rohitpavaskar\Localization\Http\Requests\StoreTranslationRequest;
+use Rohitpavaskar\Localization\Http\Requests\UpdateTranslationRequest;
+use Rohitpavaskar\Localization\Http\Requests\DeleteTranslationRequest;
+
+class LocalizationController {
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request) {
+        $advancedFilters = array();
+        if (!empty($request->advanced_filter)) {
+            $advancedFilters = json_decode($request->advanced_filter, true);
+        }
+
+        $lang1 = (isset($advancedFilters['lang_1'])) ? $advancedFilters['lang_1'] : 'en';
+        $lang2 = (isset($advancedFilters['lang_2'])) ? $advancedFilters['lang_2'] : 'en';
+
+        $result = Translation::select('translations.*', 't2.text as text_2', 't2.language as language_2')
+                ->leftJoin('translations as t2', function($join) use($lang2) {
+                    $join->on('t2.key', '=', 'translations.key')
+                    ->on('t2.type', '=', 'translations.type')
+                    ->on('t2.module', '=', 'translations.module')
+                    ->where('t2.language', '=', $lang2);
+                })
+                ->where('translations.language', $lang1)
+                ->advancedFilter($advancedFilters)
+                ->when($request->sort_name != '', function($query) use ($request) {
+                    $query->orderBy($request->sort_name, $request->sort_dir);
+                })
+                ->orderBy('translations.created_at', 'desc')
+                ->paginate($request->size, ['*'], 'pageNumber');
+        return TranslationResource::collection($result);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreTranslationRequest $request) {
+        $translation = new Translation();
+        $translation->key = $request->key;
+        $translation->text = $request->text;
+        $translation->type = $request->type;
+        $translation->module = $request->module;
+        $translation->language = $request->language;
+        $translation->save();
+        Cache::forget('translations_' . $request->language . '_' . $request->type);
+        return response(
+                array(
+            "message" => __('crud.created_msg', array('entity' => trans('common.traslation'))),
+            "status" => true,
+                ), 201);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id) {
+        return new TranslationResource(Translation::findOrFail($id));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdateTranslationRequest $request, $id) {
+        $translation = Translation::findOrFail($id);
+        
+        Cache::forget('translations_' . $translation->language . '_' . $translation->type);
+        
+        $translation->text = $request->text;
+        $translation->save();
+        
+        return response(
+                array(
+            "message" => __('crud.updated_msg', array('entity' => trans('common.translation'))),
+            "status" => true,
+                ), 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(DeleteTranslationRequest $request, $id) {
+        $translation = Translation::findOrFail($id);
+        Cache::forget('translations_' . $translation->language . '_' . $translation->type);
+        $translation->delete();
+        
+        return response(
+                array(
+            "message" => __('crud.deleted_msg', array('entity' => trans('common.translation'))),
+            "status" => true,
+                ), 200);
+    }
+
+}

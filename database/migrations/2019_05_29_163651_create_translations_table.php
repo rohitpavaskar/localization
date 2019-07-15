@@ -21,6 +21,7 @@ class CreateTranslationsTable extends Migration {
             $table->string('type')->default('application');
             $table->string('module')->default('common');
             $table->string('language', 5)->default('en');
+            $table->unique(['key', 'type', 'module', 'language']);
             $table->timestamps();
         });
 
