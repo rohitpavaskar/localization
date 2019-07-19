@@ -25,5 +25,16 @@ class UpdateTranslationRequest extends FormRequest {
             'text' => 'required'
         ];
     }
+    
+     /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes() {
+        return [
+            'key' => trans('translation.key')
+        ];
+    }
 
 }

@@ -13,7 +13,8 @@ class Localization {
      * @param  array  $options
      * @return void
      */
-    public static function routes($callback = null, array $options = []) {
+    public static function routes() {
+        Route::get('/localizations/json/{lang}.json', '\Rohitpavaskar\Localization\Http\Controllers\LocalizationController@getJson');
         Route::resource('/localizations', '\Rohitpavaskar\Localization\Http\Controllers\LocalizationController');
     }
 

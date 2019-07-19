@@ -2,6 +2,8 @@
 
 namespace Rohitpavaskar\Localization\Http\Controllers;
 
+use DB;
+use Config;
 use Illuminate\Http\Request;
 use Rohitpavaskar\Localization\Models\Translation;
 use Illuminate\Support\Facades\Cache;
@@ -58,6 +60,7 @@ class LocalizationController {
         $translation->language = $request->language;
         $translation->save();
         Cache::forget('translations_' . $request->language . '_' . $request->type);
+        Cache::forget('translations_' . $translation->language . '_json');
         return response(
                 array(
             "message" => __('crud.created_msg', array('entity' => trans('common.traslation'))),
@@ -84,12 +87,12 @@ class LocalizationController {
      */
     public function update(UpdateTranslationRequest $request, $id) {
         $translation = Translation::findOrFail($id);
-        
+
         Cache::forget('translations_' . $translation->language . '_' . $translation->type);
-        
+        Cache::forget('translations_' . $translation->language . '_json');
         $translation->text = $request->text;
         $translation->save();
-        
+
         return response(
                 array(
             "message" => __('crud.updated_msg', array('entity' => trans('common.translation'))),
@@ -107,13 +110,49 @@ class LocalizationController {
     public function destroy(DeleteTranslationRequest $request, $id) {
         $translation = Translation::findOrFail($id);
         Cache::forget('translations_' . $translation->language . '_' . $translation->type);
+        Cache::forget('translations_' . $translation->language . '_json');
         $translation->delete();
-        
+
         return response(
                 array(
             "message" => __('crud.deleted_msg', array('entity' => trans('common.translation'))),
             "status" => true,
                 ), 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function getJson($lang) {
+        return Cache::rememberForever('translations_' . $lang . '_json', function() use($lang) {
+                    $translations = DB::table('translations')
+                            ->where('language', $lang)
+                            ->whereIn('module', ['frontend', 'common'])
+                            ->get();
+                    $translationArr = array();
+                    foreach ($translations as $translation) {
+                        $translationArr[$translation->key] = $translation->text;
+                    }
+                    
+                    
+                    $fallbackTranslations = DB::table('translations')
+                            ->where('language', Config::get('app.fallback_locale'))
+                            ->whereIn('module', ['frontend', 'common'])
+                            ->get();
+
+                    $fallbackTranslationArr = array();
+                    foreach ($fallbackTranslations as $translation) {
+                        $fallbackTranslationArr[$translation->key] = $translation->text;
+                    }
+                    
+                    $finalArr = array_merge($fallbackTranslationArr, $translationArr);
+
+                    return $finalArr;
+                });
     }
 
 }

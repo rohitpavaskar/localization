@@ -30,4 +30,19 @@ class StoreTranslationRequest extends FormRequest {
         ];
     }
 
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes() {
+        return [
+            'key' => trans('translation.key'),
+            'text' => trans('translation.text'),
+            'type' => trans('translation.type'),
+            'module' => trans('translation.module'),
+            'language' => trans('translation.language'),
+        ];
+    }
+
 }
