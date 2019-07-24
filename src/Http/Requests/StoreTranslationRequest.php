@@ -38,7 +38,7 @@ class StoreTranslationRequest extends FormRequest {
     public function attributes() {
         return [
             'key' => trans('translation.key'),
-            'text' => trans('translation.text'),
+            'text' => trans('translation.translation'),
             'type' => trans('translation.type'),
             'module' => trans('translation.module'),
             'language' => trans('translation.language'),

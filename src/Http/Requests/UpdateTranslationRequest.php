@@ -22,19 +22,29 @@ class UpdateTranslationRequest extends FormRequest {
      */
     public function rules() {
         return [
-            'text' => 'required'
+            'key' => 'required',
+            'text' => 'required',
+            'type' => 'required',
+            'module' => 'required',
+            'language' => 'required',
         ];
     }
-    
-     /**
+
+    /**
      * Get custom attributes for validator errors.
      *
      * @return array
      */
     public function attributes() {
-        return [
-            'key' => trans('translation.key')
+       return [
+            'key' => trans('translation.key'),
+            'text' => trans('translation.translation'),
+            'type' => trans('translation.type'),
+            'module' => trans('translation.module'),
+            'language' => trans('translation.language'),
         ];
     }
+    
+    
 
 }

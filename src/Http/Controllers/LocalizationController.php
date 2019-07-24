@@ -86,13 +86,11 @@ class LocalizationController {
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateTranslationRequest $request, $id) {
-        $translation = Translation::findOrFail($id);
-
-        Cache::forget('translations_' . $translation->language . '_' . $translation->type);
-        Cache::forget('translations_' . $translation->language . '_json');
-        $translation->text = $request->text;
-        $translation->save();
-
+        Cache::forget('translations_' . $request->language . '_' . $request->type);
+        Cache::forget('translations_' . $request->language . '_json');
+        Translation::updateOrCreate(
+                        ['key' => $request->key, 'type' => $request->type, 'module' => $request->module, 'language' => $request->language], ['text' => $request->text]
+        );
         return response(
                 array(
             "message" => __('crud.updated_msg', array('entity' => trans('common.translation'))),
@@ -137,8 +135,8 @@ class LocalizationController {
                     foreach ($translations as $translation) {
                         $translationArr[$translation->key] = $translation->text;
                     }
-                    
-                    
+
+
                     $fallbackTranslations = DB::table('translations')
                             ->where('language', Config::get('app.fallback_locale'))
                             ->whereIn('module', ['frontend', 'common'])
@@ -146,9 +144,9 @@ class LocalizationController {
 
                     $fallbackTranslationArr = array();
                     foreach ($fallbackTranslations as $translation) {
-                        $fallbackTranslationArr[$translation->key] = $translation->text;
+                        $fallbackTranslationArr[$translation->type.'.'.$translation->key] = $translation->text;
                     }
-                    
+
                     $finalArr = array_merge($fallbackTranslationArr, $translationArr);
 
                     return $finalArr;
