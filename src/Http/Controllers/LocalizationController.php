@@ -133,7 +133,7 @@ class LocalizationController {
                             ->get();
                     $translationArr = array();
                     foreach ($translations as $translation) {
-                        $translationArr[$translation->key] = $translation->text;
+                        $translationArr[$translation->type.'.'.$translation->key] = $translation->text;
                     }
 
 
