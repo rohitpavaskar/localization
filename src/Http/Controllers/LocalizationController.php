@@ -133,7 +133,7 @@ class LocalizationController {
                             ->get();
                     $translationArr = array();
                     foreach ($translations as $translation) {
-                        $translationArr[$translation->type.'_'.$translation->key] = $translation->text;
+                        $translationArr[$translation->type.'.'.$translation->key] = $translation->text;
                     }
 
 
@@ -144,7 +144,7 @@ class LocalizationController {
 
                     $fallbackTranslationArr = array();
                     foreach ($fallbackTranslations as $translation) {
-                        $fallbackTranslationArr[$translation->type.'_'.$translation->key] = $translation->text;
+                        $fallbackTranslationArr[$translation->type.'.'.$translation->key] = $translation->text;
                     }
 
                     $finalArr = array_merge($fallbackTranslationArr, $translationArr);
