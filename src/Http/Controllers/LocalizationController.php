@@ -133,10 +133,8 @@ class LocalizationController {
                             ->get();
                     $translationArr = array();
                     foreach ($translations as $translation) {
-                        $translationArr[$translation->type.'.'.$translation->key] = $translation->text;
+                        $translationArr[$translation->type.'.'.$translation->key] = preg_replace('/:(\w+)/i', '{{${1}}}', $translation->text);
                     }
-
-
                     $fallbackTranslations = DB::table('translations')
                             ->where('language', Config::get('app.fallback_locale'))
                             ->whereIn('module', ['frontend', 'common'])
@@ -144,7 +142,7 @@ class LocalizationController {
 
                     $fallbackTranslationArr = array();
                     foreach ($fallbackTranslations as $translation) {
-                        $fallbackTranslationArr[$translation->type.'.'.$translation->key] = $translation->text;
+                        $fallbackTranslationArr[$translation->type.'.'.$translation->key] = preg_replace('/:(\w+)/i', '{{${1}}}', $translation->text);
                     }
 
                     $finalArr = array_merge($fallbackTranslationArr, $translationArr);
