@@ -23,4 +23,14 @@ class Translation extends Model {
             return $query;
         }
     }
+
+    public function scopeSearch($query, $filter) {
+        if ($filter != '') {
+            return $query->having('key', 'like', '%' . $filter . '%')
+                            ->orHaving('text', 'like', '%' . $filter . '%')
+                            ->orHaving('module', 'like', '%' . $filter . '%')
+                            ->orHaving('language_2', 'like', '%' . $filter . '%');
+        }
+    }
+
 }

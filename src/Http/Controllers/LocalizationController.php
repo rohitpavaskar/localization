@@ -35,6 +35,7 @@ class LocalizationController {
                     ->on('t2.module', '=', 'translations.module')
                     ->where('t2.language', '=', $lang2);
                 })
+                ->search($request->filter)
                 ->where('translations.language', $lang1)
                 ->advancedFilter($advancedFilters)
                 ->when($request->sort_name != '', function($query) use ($request) {
