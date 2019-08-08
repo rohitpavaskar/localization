@@ -4,6 +4,7 @@ namespace Rohitpavaskar\Localization\Http\Controllers;
 
 use DB;
 use Config;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Http\Request;
 use Rohitpavaskar\Localization\Models\Translation;
 use Illuminate\Support\Facades\Cache;
@@ -40,7 +41,6 @@ class LocalizationController {
                 ->when($request->sort_name != '', function($query) use ($request) {
                     $query->orderBy($request->sort_name, $request->sort_dir);
                 })
-//                ->orderBy('translations.created_at', 'desc')
                 ->paginate($request->size, ['*'], 'pageNumber');
         return TranslationResource::collection($result);
     }
@@ -89,7 +89,7 @@ class LocalizationController {
         Cache::forget('translations_' . $request->language . '_' . $request->type);
         Cache::forget('translations_' . $request->language . '_json');
         Translation::updateOrCreate(
-                        ['key' => $request->key, 'type' => $request->type, 'module' => $request->module, 'language' => $request->language], ['text' => $request->text]
+                ['key' => $request->key, 'type' => $request->type, 'module' => $request->module, 'language' => $request->language], ['text' => $request->text]
         );
         return response(
                 array(
@@ -133,7 +133,7 @@ class LocalizationController {
                             ->get();
                     $translationArr = array();
                     foreach ($translations as $translation) {
-                        $translationArr[$translation->type.'.'.$translation->key] = preg_replace('/:(\w+)/i', '{{${1}}}', $translation->text);
+                        $translationArr[$translation->type . '.' . $translation->key] = preg_replace('/:(\w+)/i', '{{${1}}}', $translation->text);
                     }
                     $fallbackTranslations = DB::table('translations')
                             ->where('language', Config::get('app.fallback_locale'))
@@ -142,7 +142,7 @@ class LocalizationController {
 
                     $fallbackTranslationArr = array();
                     foreach ($fallbackTranslations as $translation) {
-                        $fallbackTranslationArr[$translation->type.'.'.$translation->key] = preg_replace('/:(\w+)/i', '{{${1}}}', $translation->text);
+                        $fallbackTranslationArr[$translation->type . '.' . $translation->key] = preg_replace('/:(\w+)/i', '{{${1}}}', $translation->text);
                     }
 
                     $finalArr = array_merge($fallbackTranslationArr, $translationArr);
@@ -150,16 +150,76 @@ class LocalizationController {
                     return $finalArr;
                 });
     }
-    
+
     public function getTypes() {
         $types = Translation::select('type')
                 ->groupBy('type')
                 ->get();
-        $typesArr= array('all');
+        $typesArr = array('all');
         foreach ($types as $type) {
             array_push($typesArr, $type->type);
         }
         return $typesArr;
+    }
+
+    public function exportCSV(Request $request) {
+        $advancedFilters = array();
+        if (!empty($request->advanced_filter)) {
+            $advancedFilters = json_decode($request->advanced_filter, true);
+        }
+
+        $lang1 = (isset($advancedFilters['lang_1'])) ? $advancedFilters['lang_1'] : 'en';
+        $lang2 = (isset($advancedFilters['lang_2'])) ? $advancedFilters['lang_2'] : 'en';
+        $result = Translation::select('translations.*', 't2.text as text_2', 't2.language as language_2')
+                        ->leftJoin('translations as t2', function($join) use($lang2) {
+                            $join->on('t2.key', '=', 'translations.key')
+                            ->on('t2.type', '=', 'translations.type')
+                            ->on('t2.module', '=', 'translations.module')
+                            ->where('t2.language', '=', $lang2);
+                        })
+                        ->search($request->filter)
+                        ->where('translations.language', $lang1)
+                        ->advancedFilter($advancedFilters)
+                        ->when($request->sort_name != '', function($query) use ($request) {
+                            $query->orderBy($request->sort_name, $request->sort_dir);
+                        })->get();
+
+        $headers = array(
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=Sample_Lab_Manager.csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        $languages = \Rohitpavaskar\Localization\Models\Language::all();
+        $langArr = array();
+        foreach ($languages as $lang) {
+            $langArr[$lang->code] = $lang->text;
+        }
+
+        $columns = array(
+            trans('translations.type'),
+            trans('translations.key'),
+            $langArr[$lang1],
+            $langArr[$lang2]
+        );
+
+        $callback = function() use ($columns, $result) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            foreach ($result as $row) {
+                fputcsv($file, array(
+                    $row->type,
+                    $row->key,
+                    $row->text,
+                    $row->text_2,
+                ));
+            }
+            fclose($file);
+        };
+
+        return Response::stream($callback, 200, $headers);
     }
 
 }
