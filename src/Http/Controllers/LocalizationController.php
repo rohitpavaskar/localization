@@ -42,7 +42,7 @@ class LocalizationController {
                     $query->orderBy($request->sort_name, $request->sort_dir);
                 })
 //                ->orderBy('translations.created_at', 'desc')
-                ->paginate($request->size, ['*'], 'pageNumber');
+                ->paginate($request->size, [DB::raw('translations.*, t2.text as text_2, t2.language as language_2')], 'pageNumber');
         return TranslationResource::collection($result);
     }
 
