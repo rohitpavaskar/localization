@@ -27,7 +27,6 @@ class LocalizationController {
 
         $lang1 = (isset($advancedFilters['lang_1'])) ? $advancedFilters['lang_1'] : 'en';
         $lang2 = (isset($advancedFilters['lang_2'])) ? $advancedFilters['lang_2'] : 'en';
-
         $result = Translation::select('translations.*', 't2.text as text_2', 't2.language as language_2')
                 ->leftJoin('translations as t2', function($join) use($lang2) {
                     $join->on('t2.key', '=', 'translations.key')
@@ -42,7 +41,7 @@ class LocalizationController {
                     $query->orderBy($request->sort_name, $request->sort_dir);
                 })
 //                ->orderBy('translations.created_at', 'desc')
-                ->paginate($request->size, [DB::raw('translations.*, t2.text as text_2, t2.language as language_2')], 'pageNumber');
+                ->paginate($request->size, ['*'], 'pageNumber');
         return TranslationResource::collection($result);
     }
 

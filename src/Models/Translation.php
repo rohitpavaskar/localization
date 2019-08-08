@@ -26,10 +26,10 @@ class Translation extends Model {
 
     public function scopeSearch($query, $filter) {
         if ($filter != '') {
-            return $query->having('translations.key', 'like', '%' . $filter . '%')
-                            ->orHaving('translations.text', 'like', '%' . $filter . '%')
-                            ->orHaving('translations.module', 'like', '%' . $filter . '%')
-                            ->orHaving('text_2', 'like', '%' . $filter . '%');
+            return $query->where('translations.key', 'like', '%' . $filter . '%')
+                            ->orWhere('translations.text', 'like', '%' . $filter . '%')
+                            ->orWhere('translations.module', 'like', '%' . $filter . '%')
+                            ->orWhere('t2.text', 'like', '%' . $filter . '%');
         }
     }
 
