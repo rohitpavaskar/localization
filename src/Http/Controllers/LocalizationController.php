@@ -41,7 +41,7 @@ class LocalizationController {
                 ->when($request->sort_name != '', function($query) use ($request) {
                     $query->orderBy($request->sort_name, $request->sort_dir);
                 })
-                ->orderBy('translations.created_at', 'desc')
+//                ->orderBy('translations.created_at', 'desc')
                 ->paginate($request->size, ['*'], 'pageNumber');
         return TranslationResource::collection($result);
     }

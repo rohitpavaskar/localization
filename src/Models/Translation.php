@@ -26,9 +26,9 @@ class Translation extends Model {
 
     public function scopeSearch($query, $filter) {
         if ($filter != '') {
-            return $query->having('key', 'like', '%' . $filter . '%')
-                            ->orHaving('text', 'like', '%' . $filter . '%')
-                            ->orHaving('module', 'like', '%' . $filter . '%')
+            return $query->having('translations.key', 'like', '%' . $filter . '%')
+                            ->orHaving('translations.text', 'like', '%' . $filter . '%')
+                            ->orHaving('translations.module', 'like', '%' . $filter . '%')
                             ->orHaving('text_2', 'like', '%' . $filter . '%');
         }
     }
