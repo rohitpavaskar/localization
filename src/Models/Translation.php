@@ -11,8 +11,8 @@ class Translation extends Model {
     public function scopeAdvancedFilter($query, $advancedFilter) {
         if (count($advancedFilter)) {
             if (isset($advancedFilter['type'])) {
-                if ($advancedFilter['type'] != '') {
-                    $query->where('type', $advancedFilter['type']);
+                if ($advancedFilter['type'] != '' && $advancedFilter['type'] != 'all') {
+                    $query->where('translations.type', $advancedFilter['type']);
                 }
             }
             if (isset($advancedFilter['id'])) {
