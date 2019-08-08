@@ -151,5 +151,16 @@ class LocalizationController {
                     return $finalArr;
                 });
     }
+    
+    public function getTypes() {
+        $types = Translation::select('type')
+                ->groupBy('type')
+                ->get();
+        $typesArr= array('all');
+        foreach ($types as $type) {
+            array_push($typesArr, $type->type);
+        }
+        return $typesArr;
+    }
 
 }

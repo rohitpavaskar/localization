@@ -29,7 +29,7 @@ class Translation extends Model {
             return $query->having('key', 'like', '%' . $filter . '%')
                             ->orHaving('text', 'like', '%' . $filter . '%')
                             ->orHaving('module', 'like', '%' . $filter . '%')
-                            ->orHaving('language_2', 'like', '%' . $filter . '%');
+                            ->orHaving('text_2', 'like', '%' . $filter . '%');
         }
     }
 
