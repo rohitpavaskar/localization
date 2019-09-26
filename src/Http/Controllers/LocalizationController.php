@@ -222,4 +222,14 @@ class LocalizationController {
         return Response::stream($callback, 200, $headers);
     }
 
+    function clearCache($key, $language) {
+        $languages = Language::all();
+        Cache::forget(str_replace("{{language}}", $language, $key));
+        foreach ($languages as $language) {
+            if ($language->code == Config::get('app.fallback_locale')) {
+                Cache::forget(str_replace("{{language}}", $language, $key));
+            }
+        }
+    }
+
 }
