@@ -89,7 +89,7 @@ class LocalizationController {
         Cache::forget('translations_' . $request->language . '_' . $request->type);
         Cache::forget('translations_' . $request->language . '_json');
         Translation::updateOrCreate(
-                ['key' => $request->key, 'type' => $request->type, 'module' => $request->module, 'language' => $request->language], ['text' => $request->text]
+                ['key' => $request->key, 'type' => $request->type, 'module' => $request->module, 'language' => $request->language], ['text' => $request->text, 'is_updated' => '1']
         );
         return response(
                 array(

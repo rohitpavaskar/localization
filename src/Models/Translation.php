@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Translation extends Model {
 
-    protected $fillable = ['key', 'text', 'type', 'module', 'language'];
+    protected $fillable = ['key', 'text', 'type', 'module', 'language', 'is_updated'];
 
     public function scopeAdvancedFilter($query, $advancedFilter) {
         if (count($advancedFilter)) {
